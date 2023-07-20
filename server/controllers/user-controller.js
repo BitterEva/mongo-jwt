@@ -1,8 +1,15 @@
+const ApiError = require("../exceptions/api-error");
 const userService = require("../services/user-service");
+const { validationResult } = require('express-validator');
 
 class UserController {
     async registration(req, res, next) {
         try {
+            const errors = validationResult(req);
+            if (!errors.isEmpty()) {
+                return next(ApiError.BadRequest("Validation error", errors.array()));
+            }
+
             const { email, username, age, password } = req.body;
             const userData = await userService.registration(email, password, age, username);
 
@@ -14,15 +21,22 @@ class UserController {
             );
             return res.json(userData)
         } catch (error) {
-            console.log(error);
+            next(error);
         }
     }
 
     async login(req, res, next) {
         try {
-
+            const { email, password } = req.body;
+            const userData = await userService.login(email, password);
+            res.cookie(
+                'refreshToken',
+                userData.refreshToken,
+                { maxAge: 15 * 24 * 60 * 60 * 1000, httpOnly: true }
+            );
+            return res.json(userData)
         } catch (error) {
-            console.log(error);
+            next(error);
         }
     }
 
@@ -30,15 +44,17 @@ class UserController {
         try {
 
         } catch (error) {
-            console.log(error);
+            next(error);
         }
     }
 
     async activate(req, res, next) {
         try {
-
+            const activationLink = req.params.link;
+            await userService.activate(activationLink);
+            return res.redirect(process.env.CLIENT_URL);
         } catch (error) {
-            console.log(error);
+            next(error);
         }
     }
 
@@ -46,7 +62,7 @@ class UserController {
         try {
 
         } catch (error) {
-            console.log(error);
+            next(error);
         }
     }
 
@@ -54,7 +70,7 @@ class UserController {
         try {
             res.json(['123', '321'])
         } catch (error) {
-            console.log(error);
+            next(error);
         }
     }
 }

@@ -5,6 +5,7 @@ const mongoose = require('mongoose');
 require('dotenv').config();
 
 const authRoute = require('./routes/auth-router');
+const errorMiddleware = require('./middlewares/error-middleware');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -14,6 +15,7 @@ app.use(cors());
 app.use(express.json());
 app.use(cookieParser());
 app.use('/api',authRoute);
+app.use(errorMiddleware);
 
 const start = async () => {
     try {
