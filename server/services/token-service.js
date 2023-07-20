@@ -1,8 +1,7 @@
 const jwt = require('jsonwebtoken');
-const tokenModel = require('../models/tocken-model');
+const tokenModel = require('../models/token-model');
 
-
-class TockenService {
+class TokenService {
     generateTokens(payload) {
         const accessToken = jwt.sign(payload, process.env.JWT_ACCESS_SECRET, {
             expiresIn: '15m'
@@ -26,8 +25,8 @@ class TockenService {
             return tokenData.save();
         }
         const token = await tokenModel.create({ user: userId, refreshToken })
-        return token
+        return token;
     }
 }
 
-module.exports = new TockenService();
+module.exports = new TokenService();
